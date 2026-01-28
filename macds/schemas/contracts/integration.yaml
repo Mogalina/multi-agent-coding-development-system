@@ -1,0 +1,83 @@
+name: integration
+version: "1.0"
+description: Contract for change integration
+
+input:
+  type: object
+  required:
+    - request_id
+    - changes
+  properties:
+    request_id:
+      type: string
+    changes:
+      type: array
+      items:
+        type: object
+        properties:
+          path:
+            type: string
+          content:
+            type: string
+          action:
+            type: string
+            enum: [create, modify, delete]
+    target_branch:
+      type: string
+      default: main
+    source_branch:
+      type: string
+    review_approval:
+      type: boolean
+      description: Whether code review passed
+    build_approval:
+      type: boolean
+      description: Whether build/tests passed
+
+output:
+  type: object
+  required:
+    - request_id
+    - success
+  properties:
+    request_id:
+      type: string
+    success:
+      type: boolean
+    merged_files:
+      type: array
+      items:
+        type: string
+    conflicts:
+      type: array
+      items:
+        type: object
+        properties:
+          file:
+            type: string
+          type:
+            type: string
+            enum: [merge_conflict, lock_conflict, permission_denied]
+          resolution_attempted:
+            type: boolean
+          resolved:
+            type: boolean
+    commit_sha:
+      type: string
+      pattern: "^[a-f0-9]{8,40}$"
+    integration_notes:
+      type: string
+
+validation_rules:
+  - id: INT-001
+    severity: error
+    condition: "review_approval == true"
+    message: Integration blocked - review approval required
+  - id: INT-002
+    severity: error
+    condition: "build_approval == true"
+    message: Integration blocked - build approval required
+  - id: INT-003
+    severity: error
+    condition: "len(conflicts) == 0 or all(c.resolved for c in conflicts)"
+    message: Unresolved conflicts block integration

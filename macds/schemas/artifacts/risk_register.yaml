@@ -1,0 +1,79 @@
+# Risk Register Artifact Schema
+# Owned by: ProductAgent
+
+name: risk_register_artifact
+version: "1.0"
+description: Schema for RISK_REGISTER.md artifact
+owner: ProductAgent
+filename: RISK_REGISTER.md
+format: markdown
+
+structure:
+  sections:
+    - name: header
+      heading: "# Risk Register"
+      required: true
+      
+    - name: risks
+      heading: "## R-{id}: {title}"
+      required: true
+      repeatable: true
+      content:
+        type: structured
+        properties:
+          id:
+            type: string
+            pattern: "[0-9]{3}"
+          title:
+            type: string
+            required: true
+          probability:
+            label: "- Probability:"
+            type: enum
+            values: [Low, Medium, High]
+            required: true
+          impact:
+            label: "- Impact:"
+            type: enum
+            values: [Low, Medium, High]
+            required: true
+          mitigation:
+            label: "- Mitigation:"
+            type: prose
+            required: true
+          status:
+            label: "- Status:"
+            type: enum
+            values: [Open, Mitigated, Closed, Accepted]
+            required: true
+          owner:
+            label: "- Owner:"
+            type: string
+            required: false
+          due_date:
+            label: "- Due Date:"
+            type: date
+            required: false
+
+computed_fields:
+  risk_score:
+    formula: "probability_value * impact_value"
+    probability_values:
+      Low: 1
+      Medium: 2
+      High: 3
+    impact_values:
+      Low: 1
+      Medium: 2
+      High: 3
+
+validation:
+  - rule: unique_risk_ids
+    condition: "all_unique(R-*.id)"
+    message: Risk IDs must be unique
+  - rule: mitigation_for_high_risks
+    condition: "all(R-* where probability=High or impact=High).mitigation is not empty"
+    message: High probability or impact risks must have mitigation
+  - rule: open_risks_tracked
+    condition: "all(R-* where status=Open).owner is defined"
+    message: Open risks should have an owner

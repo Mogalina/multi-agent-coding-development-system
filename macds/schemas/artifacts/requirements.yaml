@@ -1,0 +1,66 @@
+# Requirements Artifact Schema
+# Owned by: ProductAgent
+
+name: requirements_artifact
+version: "1.0"
+description: Schema for REQUIREMENTS.md artifact
+owner: ProductAgent
+filename: REQUIREMENTS.md
+format: markdown
+
+structure:
+  sections:
+    - name: overview
+      heading: "# Requirements"
+      required: true
+      
+    - name: functional_requirements
+      heading: "## Functional Requirements"
+      required: true
+      content:
+        type: checklist
+        item_pattern: "^- \\[([ x])\\] FR-[0-9]{3}: .+$"
+        properties:
+          id:
+            pattern: "FR-[0-9]{3}"
+          status:
+            values: [" ", "x"]
+            meaning:
+              " ": incomplete
+              "x": complete
+          description:
+            type: string
+            
+    - name: nonfunctional_requirements
+      heading: "## Non-Functional Requirements"
+      required: true
+      content:
+        type: checklist
+        item_pattern: "^- \\[([ x])\\] NFR-[0-9]{3}: .+$"
+        
+    - name: acceptance_criteria
+      heading: "## Acceptance Criteria"
+      required: true
+      content:
+        type: checklist
+        item_pattern: "^- \\[([ x])\\] AC-[0-9]{3}: .+$"
+        
+    - name: constraints
+      heading: "## Constraints"
+      required: false
+      content:
+        type: list
+        
+    - name: assumptions
+      heading: "## Assumptions"
+      required: false
+      content:
+        type: list
+
+validation:
+  - rule: at_least_one_functional_requirement
+    condition: "count(FR-*) >= 1"
+    message: At least one functional requirement is required
+  - rule: at_least_one_acceptance_criterion
+    condition: "count(AC-*) >= 1"
+    message: At least one acceptance criterion is required

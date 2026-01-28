@@ -1,0 +1,69 @@
+# Coding Standards Artifact Schema
+# Owned by: ArchitectAgent
+
+name: coding_standards_artifact
+version: "1.0"
+description: Schema for CODING_STANDARDS.md artifact
+owner: ArchitectAgent
+filename: CODING_STANDARDS.md
+format: markdown
+
+structure:
+  sections:
+    - name: header
+      heading: "# Coding Standards"
+      required: true
+      
+    - name: general
+      heading: "## General"
+      required: true
+      content:
+        type: list
+        description: Universal standards across all code
+        
+    - name: language_specific
+      heading: "## {Language}"
+      required: false
+      repeatable: true
+      content:
+        type: list
+        properties:
+          language:
+            type: string
+            examples: [Python, JavaScript, TypeScript, Go]
+            
+    - name: documentation
+      heading: "## Documentation"
+      required: true
+      content:
+        type: list
+        description: Documentation requirements
+        
+    - name: testing
+      heading: "## Testing"
+      required: false
+      content:
+        type: list
+        description: Testing standards
+        
+    - name: security
+      heading: "## Security"
+      required: false
+      content:
+        type: list
+        description: Security coding practices
+        
+    - name: performance
+      heading: "## Performance"
+      required: false
+      content:
+        type: list
+        description: Performance best practices
+
+validation:
+  - rule: general_section_required
+    condition: "exists(## General)"
+    message: General standards section is required
+  - rule: documentation_required
+    condition: "exists(## Documentation)"
+    message: Documentation standards are required

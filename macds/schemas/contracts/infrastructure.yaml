@@ -1,0 +1,67 @@
+name: infrastructure
+version: "1.0"
+description: Contract for infrastructure operations
+
+input:
+  type: object
+  required:
+    - request_id
+    - operation
+  properties:
+    request_id:
+      type: string
+    operation:
+      type: string
+      enum: [deploy, configure, scale, monitor, rollback]
+    target_environment:
+      type: string
+      enum: [development, staging, production]
+      default: development
+    configuration:
+      type: object
+      additionalProperties: true
+
+output:
+  type: object
+  required:
+    - request_id
+    - success
+    - operation
+    - environment
+  properties:
+    request_id:
+      type: string
+    success:
+      type: boolean
+    operation:
+      type: string
+    environment:
+      type: string
+    changes_applied:
+      type: array
+      items:
+        type: object
+        properties:
+          type:
+            type: string
+          target:
+            type: string
+          status:
+            type: string
+            enum: [completed, failed, pending, rolled_back]
+    logs:
+      type: string
+    next_steps:
+      type: array
+      items:
+        type: string
+
+validation_rules:
+  - id: INFRA-001
+    severity: error
+    condition: "operation in ['deploy', 'configure', 'scale', 'monitor', 'rollback']"
+    message: Invalid infrastructure operation
+  - id: INFRA-002
+    severity: warning
+    condition: "environment != 'production' or has_approval"
+    message: Production operations require explicit approval

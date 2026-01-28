@@ -1,0 +1,43 @@
+services:
+  macds:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: macds
+    volumes:
+      - ./workspace:/app/workspace
+      - macds-data:/app/.macds
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    working_dir: /app/workspace
+    tty: true
+    stdin_open: true
+
+  # Development service with hot reload
+  macds-dev:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: production
+    container_name: macds-dev
+    volumes:
+      - .:/app
+      - macds-dev-data:/app/.macds
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
+      - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
+      - LOG_LEVEL=DEBUG
+    working_dir: /app
+    command: ["python", "-m", "macds.main", "status"]
+    profiles:
+      - dev
+
+volumes:
+  macds-data:
+    driver: local
+  macds-dev-data:
+    driver: local

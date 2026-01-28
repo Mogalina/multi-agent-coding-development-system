@@ -1,0 +1,90 @@
+# API Contracts Artifact Schema
+# Owned by: ArchitectAgent
+
+name: api_contracts_artifact
+version: "1.0"
+description: Schema for API_CONTRACTS.yaml artifact
+owner: ArchitectAgent
+filename: API_CONTRACTS.yaml
+format: yaml
+
+structure:
+  root:
+    type: object
+    properties:
+      version:
+        type: string
+        pattern: "^[0-9]+\\.[0-9]+(\\.[0-9]+)?$"
+      contracts:
+        type: array
+        items:
+          $ref: "#/definitions/contract"
+
+definitions:
+  contract:
+    type: object
+    required:
+      - name
+      - version
+      - input
+      - output
+    properties:
+      name:
+        type: string
+        pattern: "^[A-Z][a-zA-Z0-9]*Contract$"
+      version:
+        type: string
+      description:
+        type: string
+      input:
+        $ref: "#/definitions/schema"
+      output:
+        $ref: "#/definitions/schema"
+      errors:
+        type: array
+        items:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+              
+  schema:
+    type: object
+    properties:
+      type:
+        type: string
+        enum: [object, array, string, number, boolean]
+      required:
+        type: array
+        items:
+          type: string
+      properties:
+        type: object
+        additionalProperties:
+          $ref: "#/definitions/property"
+          
+  property:
+    type: object
+    properties:
+      type:
+        type: string
+      description:
+        type: string
+      pattern:
+        type: string
+      enum:
+        type: array
+      minimum:
+        type: number
+      maximum:
+        type: number
+
+validation:
+  - rule: unique_contract_names
+    condition: "all_unique(contracts[*].name)"
+    message: Contract names must be unique
+  - rule: versioned_contracts
+    condition: "all(contracts[*].version matches semver)"
+    message: All contracts must have valid semantic version

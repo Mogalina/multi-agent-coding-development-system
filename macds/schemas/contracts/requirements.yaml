@@ -1,0 +1,76 @@
+name: requirements
+version: "1.0"
+description: Contract for requirements definition
+
+input:
+  type: object
+  required:
+    - request_id
+    - user_request
+  properties:
+    request_id:
+      type: string
+      description: Unique identifier for the request
+    user_request:
+      type: string
+      description: Natural language user request
+    context:
+      type: string
+      description: Optional additional context
+    constraints:
+      type: array
+      items:
+        type: string
+      description: Known constraints to consider
+
+output:
+  type: object
+  required:
+    - request_id
+    - requirements
+    - acceptance_criteria
+    - constraints
+  properties:
+    request_id:
+      type: string
+    requirements:
+      type: array
+      items:
+        type: object
+        required:
+          - id
+          - description
+        properties:
+          id:
+            type: string
+            pattern: "^REQ-[0-9]{3}$"
+          description:
+            type: string
+          priority:
+            type: string
+            enum: [high, medium, low]
+          status:
+            type: string
+            enum: [proposed, approved, implemented, verified]
+    acceptance_criteria:
+      type: array
+      items:
+        type: string
+    constraints:
+      type: array
+      items:
+        type: string
+    risks:
+      type: array
+      items:
+        type: string
+
+validation_rules:
+  - id: REQ-001
+    severity: error
+    condition: "len(requirements) > 0"
+    message: Requirements cannot be empty
+  - id: REQ-002
+    severity: error
+    condition: "all(r.id and r.description for r in requirements)"
+    message: Each requirement must have id and description

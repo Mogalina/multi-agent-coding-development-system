@@ -1,0 +1,81 @@
+# Architecture Artifact Schema
+# Owned by: ArchitectAgent
+
+name: architecture_artifact
+version: "1.0"
+description: Schema for ARCHITECTURE.md artifact
+owner: ArchitectAgent
+filename: ARCHITECTURE.md
+format: markdown
+
+structure:
+  sections:
+    - name: overview
+      heading: "# Architecture"
+      required: true
+      content:
+        type: prose
+        description: High-level system description
+        
+    - name: system_overview
+      heading: "## Overview"
+      required: true
+      content:
+        type: prose
+        
+    - name: components
+      heading: "## Components"
+      required: true
+      content:
+        type: subsections
+        pattern: "### {component_name}"
+        properties:
+          component_name:
+            type: string
+          responsibility:
+            label: "- Responsibility:"
+            type: string
+          interfaces:
+            label: "- Interfaces:"
+            type: list
+          dependencies:
+            label: "- Dependencies:"
+            type: list
+            
+    - name: invariants
+      heading: "## Invariants"
+      required: true
+      content:
+        type: numbered_list
+        description: Rules that must always hold
+        
+    - name: data_flow
+      heading: "## Data Flow"
+      required: false
+      content:
+        type: prose
+        supports_mermaid: true
+        
+    - name: security
+      heading: "## Security Considerations"
+      required: false
+      content:
+        type: prose
+        
+    - name: design_decisions_ref
+      heading: "## Design Decisions"
+      required: true
+      content:
+        type: reference
+        target: DESIGN_DECISIONS.log
+
+validation:
+  - rule: at_least_one_component
+    condition: "count(components) >= 1"
+    message: Architecture must define at least one component
+  - rule: invariants_defined
+    condition: "count(invariants) >= 1"
+    message: Architecture must define at least one invariant
+  - rule: no_circular_deps
+    condition: "no_circular_dependencies(components)"
+    message: Components must not have circular dependencies

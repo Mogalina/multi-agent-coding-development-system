@@ -1,0 +1,94 @@
+name: code_review
+version: "1.0"
+description: Contract for code review
+
+input:
+  type: object
+  required:
+    - request_id
+    - code_diff
+    - architecture_constraints
+    - coding_standards
+  properties:
+    request_id:
+      type: string
+    code_diff:
+      type: string
+      description: Unified diff of changes to review
+    architecture_constraints:
+      type: array
+      items:
+        type: string
+      description: Invariants to check against
+    coding_standards:
+      type: string
+      description: Standards document to enforce
+    files_to_review:
+      type: array
+      items:
+        type: string
+
+output:
+  type: object
+  required:
+    - request_id
+    - verdict
+    - quality_score
+  properties:
+    request_id:
+      type: string
+    verdict:
+      type: string
+      enum: [pass, fail, needs_revision, escalate]
+      description: Review decision
+    violations:
+      type: array
+      items:
+        type: object
+        required:
+          - rule_id
+          - severity
+          - message
+        properties:
+          rule_id:
+            type: string
+          severity:
+            type: string
+            enum: [error, warning, info]
+          message:
+            type: string
+          location:
+            type: string
+          suggested_fix:
+            type: string
+    suggested_patches:
+      type: array
+      items:
+        type: object
+        properties:
+          file:
+            type: string
+          original:
+            type: string
+          replacement:
+            type: string
+    security_concerns:
+      type: array
+      items:
+        type: string
+    quality_score:
+      type: number
+      minimum: 0
+      maximum: 100
+    comments:
+      type: string
+
+validation_rules:
+  - id: REVIEW-001
+    severity: error
+    condition: "verdict in ['pass', 'fail', 'needs_revision', 'escalate']"
+    message: Verdict must be a valid value
+  - id: REVIEW-002
+    severity: warning
+    condition: "verdict == 'fail' implies len(violations) > 0"
+    message: Failed review should include violations

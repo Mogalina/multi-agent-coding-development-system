@@ -1,0 +1,67 @@
+# Design Decisions Artifact Schema
+# Owned by: ArchitectAgent
+
+name: design_decisions_artifact
+version: "1.0"
+description: Schema for DESIGN_DECISIONS.log artifact
+owner: ArchitectAgent
+filename: DESIGN_DECISIONS.log
+format: structured_log
+
+structure:
+  header:
+    heading: "# Design Decisions Log"
+    
+  entries:
+    pattern: |
+      ## DD-{id}: {title}
+      - Date: {date}
+      - Status: {status}
+      - Context: {context}
+      - Decision: {decision}
+      - Rationale: {rationale}
+      - Alternatives Considered: {alternatives}
+    
+    properties:
+      id:
+        type: string
+        pattern: "[0-9]{8}-[0-9]{3}"
+        description: "Format: YYYYMMDD-NNN"
+      title:
+        type: string
+        required: true
+      date:
+        type: date
+        format: "YYYY-MM-DD"
+        required: true
+      status:
+        type: enum
+        values: [proposed, accepted, rejected, superseded]
+        required: true
+      context:
+        type: prose
+        required: true
+        description: Why this decision is being made
+      decision:
+        type: prose
+        required: true
+        description: What was decided
+      rationale:
+        type: prose
+        required: true
+        description: Why this option was chosen
+      alternatives:
+        type: list
+        required: false
+        description: Other options that were considered
+
+validation:
+  - rule: unique_ids
+    condition: "all_unique(DD-*.id)"
+    message: Decision IDs must be unique
+  - rule: chronological_order
+    condition: "is_sorted_desc(DD-*.date)"
+    message: Decisions should be in reverse chronological order
+  - rule: status_required
+    condition: "all(DD-*.status in ['proposed', 'accepted', 'rejected', 'superseded'])"
+    message: All decisions must have a valid status

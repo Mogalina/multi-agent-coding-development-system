@@ -1,0 +1,13 @@
+contracts:
+  - name: ExampleContract
+    version: "1.0"
+    input:
+      type: object
+      properties:
+        request_id:
+          type: string
+    output:
+      type: object
+      properties:
+        success:
+          type: boolean

@@ -1,0 +1,91 @@
+name: implementation
+version: "1.0"
+description: Contract for code implementation
+
+input:
+  type: object
+  required:
+    - request_id
+    - task_description
+    - architecture
+  properties:
+    request_id:
+      type: string
+    task_description:
+      type: string
+    architecture:
+      type: object
+      description: Architecture context from ArchitectAgent
+    api_contract:
+      type: object
+      description: Specific API contract to implement
+    coding_standards:
+      type: string
+      description: Coding standards to follow
+    target_files:
+      type: array
+      items:
+        type: string
+      description: Existing files to modify
+
+output:
+  type: object
+  required:
+    - request_id
+    - files_created
+    - files_modified
+    - files_deleted
+    - api_compliance
+  properties:
+    request_id:
+      type: string
+    files_created:
+      type: array
+      items:
+        type: object
+        required:
+          - path
+          - content
+          - language
+        properties:
+          path:
+            type: string
+          content:
+            type: string
+          language:
+            type: string
+            enum: [python, javascript, typescript, yaml, json, markdown]
+    files_modified:
+      type: array
+      items:
+        type: object
+        required:
+          - path
+          - diff
+          - description
+        properties:
+          path:
+            type: string
+          diff:
+            type: string
+          description:
+            type: string
+    files_deleted:
+      type: array
+      items:
+        type: string
+    implementation_notes:
+      type: string
+    api_compliance:
+      type: boolean
+      description: Whether implementation follows API contract
+
+validation_rules:
+  - id: IMPL-001
+    severity: warning
+    condition: "len(files_created) > 0 or len(files_modified) > 0"
+    message: Implementation produced no file changes
+  - id: IMPL-002
+    severity: error
+    condition: "api_compliance == true"
+    message: Implementation must comply with API contract

@@ -1,0 +1,96 @@
+name: build_test
+version: "1.0"
+description: Contract for build and test execution
+
+input:
+  type: object
+  required:
+    - request_id
+    - source_files
+    - test_files
+  properties:
+    request_id:
+      type: string
+    source_files:
+      type: array
+      items:
+        type: string
+    test_files:
+      type: array
+      items:
+        type: string
+    build_command:
+      type: string
+      description: Custom build command
+    test_command:
+      type: string
+      description: Custom test command
+
+output:
+  type: object
+  required:
+    - request_id
+    - build_success
+    - test_success
+  properties:
+    request_id:
+      type: string
+    build_success:
+      type: boolean
+    test_success:
+      type: boolean
+    test_results:
+      type: object
+      properties:
+        passed:
+          type: integer
+          minimum: 0
+        failed:
+          type: integer
+          minimum: 0
+        skipped:
+          type: integer
+          minimum: 0
+        coverage:
+          type: number
+          minimum: 0
+          maximum: 100
+    build_logs:
+      type: string
+    test_logs:
+      type: string
+    metrics:
+      type: object
+      properties:
+        coverage_pct:
+          type: number
+        duration_s:
+          type: number
+        memory_mb:
+          type: number
+    security_scan:
+      type: object
+      properties:
+        scanner:
+          type: string
+        files_scanned:
+          type: integer
+        vulnerabilities:
+          type: array
+        risk_level:
+          type: string
+          enum: [low, medium, high, critical]
+
+validation_rules:
+  - id: BUILD-001
+    severity: error
+    condition: "build_success == true"
+    message: Build failed
+  - id: TEST-001
+    severity: error
+    condition: "test_success == true"
+    message: Tests failed
+  - id: TEST-002
+    severity: warning
+    condition: "metrics.coverage_pct >= 70"
+    message: Code coverage below 70%
